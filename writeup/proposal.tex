@@ -23,8 +23,15 @@ One specific aspect of TF binding that is important to understand is the effect 
 We propose to leverage a more mechanistic understanding of TF binding to ``constrain" our predictor in order to improve the interpretability of its predictions on sequences that are not well represented in the training set. We aim to do this using the fact that there are databases that contain short DNA sequences called {\em motifs} that have been observed to be bound by different transcription factors. (Each motif corresponds to one transcription factor.) Rather than training a generic convolutional neural network to predict binding, we plan to train a neural network whose first layer of convolutions is fixed to match these motifs. This way, when we look at the difference in the predictions for two possible values of a genetic variant, we know that the variant must act by changing the strength of one of these biologically relevant motifs.
 
 \section{Goals for 1 month}
-TODO
+The goals fall into the categories of 1. data processing, 2. model building, and 3. model evaluation.
+\begin{enumerate}
+\item Data Processing: Assemble the data used in \cite{zhou2015predicting} by obtaining human reference genome sequences for sites where at least one of 919 chromatin marks (labels) is present (positive class).  Assemble a set of motifs from \cite{doi:10.1093/nar/gkx1106}, making sure the number of motifs is not too big, and that they are all of uniform size (for reference, \cite{zhou2015predicting} uses 320 filters that are 8 base pairs long, whereas \cite{doi:10.1093/nar/gkx1106} contains 402 human transcription factor motifs).
+\item Implement in Tensorflow the neural network classifier.  Should be able to specify the hardcoded list of motifs when constructing the model.  Do not worry about tuning hyperparameters yet - assume they are all specified in a configuration file.
+\item Evaluate prediction accuracy on sequences from chromosome 8/9.
+\end{enumerate}
 
+\bibliographystyle{plain}
+\bibliography{ref}
 
 
 \end{document}  
