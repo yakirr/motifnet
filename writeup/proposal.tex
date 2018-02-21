@@ -26,8 +26,8 @@ We propose to leverage a more mechanistic understanding of TF binding to ``const
 The goals fall into the categories of 1. data processing, 2. model building, and 3. model evaluation.
 \begin{enumerate}
 \item Data Processing: Assemble the data used in \cite{zhou2015predicting} by obtaining human reference genome sequences for sites where at least one of 919 chromatin marks (labels) is present (positive class).  Assemble a set of motifs from \cite{doi:10.1093/nar/gkx1106}, making sure the number of motifs is not too big, and that they are all of uniform size (for reference, \cite{zhou2015predicting} uses 320 filters that are 8 base pairs long, whereas \cite{doi:10.1093/nar/gkx1106} contains 402 human transcription factor motifs).
-\item Implement in Tensorflow the neural network classifier.  Should be able to specify the hardcoded list of motifs when constructing the model.  Do not worry about tuning hyperparameters yet - assume they are all specified in a configuration file.
-\item Evaluate prediction accuracy on sequences from chromosome 8/9.
+\item Model Building: Implement in Tensorflow the neural network classifier.  Should be able to specify the hardcoded list of motifs when constructing the model.  Do not worry about tuning hyperparameters yet - assume they are all specified in a configuration file.
+\item Model Evaluation Evaluate AUROC on sequences from chromosome 8/9.
 \end{enumerate}
 
 \bibliographystyle{plain}
