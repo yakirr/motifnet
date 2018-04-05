@@ -6,7 +6,7 @@ import tensorflow as tf
 
 def create_shards(path, train_out_path, valid_out_path, test_out_path,
         test_chrs, valid_chrs,
-        blocksize=1000, text=True, binary=True, num_blocks=None):
+        blocksize=1000, text=True, binary=True, num_blocks=None, task_file='tasks.txt'):
     # output 2 folders, with samples from 
 
     from os import listdir
@@ -15,35 +15,51 @@ def create_shards(path, train_out_path, valid_out_path, test_out_path,
 
     # figure out one hot encoding mapping
     import string
-    tf_d = {}
+#    tf_d = {}
     train_chr_to_files = collections.defaultdict(list)
     valid_chr_to_files = collections.defaultdict(list)
     test_chr_to_files = collections.defaultdict(list)
     for f in files:
         _, name = os.path.split(f)
-        tft, chr, _ = string.split(name, sep='.')
-        chr = int(chr)
-        tf_d[tft] = 1
-        if chr in test_chrs:
-            test_chr_to_files[chr].append(f)
-        elif chr in valid_chrs:
-            valid_chr_to_files[chr].append(f)
-        else:
-            train_chr_to_files[chr].append(f)
+        if name != task_file:
+            _, chr, _ = string.split(name, sep='.')
+            chr = int(chr)
+#            tf_d[tft] = 1
+            if chr in test_chrs:
+                test_chr_to_files[chr] = f
+            elif chr in valid_chrs:
+                valid_chr_to_files[chr] = f
+            else:
+                train_chr_to_files[chr] = f
 
-    tf_to_pos = dict(map(reversed,enumerate(tf_d.keys())))
+    tf_d = pd.Series.from_csv(join(path,task_file), index_col=None).values
 
+    tf_to_pos = dict(map(reversed,enumerate(tf_d)))
+
+    
     # create iterator over lines
 
     def file_input(files):
-        for f in files:
-            with open(f,'r') as fin:
-                for line in fin:
-                    yield line
+        fs = map(open, files) 
+        while len(fs) > 0:
+            i = np.random.randint(0,len(fs))
+            try:
+                line = fs[i].next()
+                yield line
+            except StopIteration:
+                fs.pop(i)
 
-    train_readers = {chr:file_input(train_chr_to_files[chr]) for chr in train_chr_to_files.keys()}
-    valid_readers = {chr:file_input(valid_chr_to_files[chr]) for chr in valid_chr_to_files.keys()}
-    test_readers = {chr:file_input(test_chr_to_files[chr]) for chr in test_chr_to_files.keys()}
+            
+
+#            for f in files:
+#            fs.append(f)
+#            with open(f,'r') as fin:
+#                for line in fin:
+#                    yield line
+
+    train_readers = {chr:open(train_chr_to_files[chr]) for chr in train_chr_to_files.keys()}
+    valid_readers = {chr:open(valid_chr_to_files[chr]) for chr in valid_chr_to_files.keys()}
+    test_readers = {chr:open(test_chr_to_files[chr]) for chr in test_chr_to_files.keys()}
 
     seq_len = None
     label_len = None
