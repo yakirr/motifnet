@@ -4,7 +4,9 @@ import collections
 import os.path, pdb
 import tensorflow as tf
 
-def create_shards(path, train_out_path, test_out_path, test_chrs, blocksize=1000, text=True, binary=True, num_blocks=None):
+def create_shards(path, train_out_path, valid_out_path, test_out_path,
+        test_chrs, valid_chrs,
+        blocksize=1000, text=True, binary=True, num_blocks=None):
     # output 2 folders, with samples from 
 
     from os import listdir
@@ -15,6 +17,7 @@ def create_shards(path, train_out_path, test_out_path, test_chrs, blocksize=1000
     import string
     tf_d = {}
     train_chr_to_files = collections.defaultdict(list)
+    valid_chr_to_files = collections.defaultdict(list)
     test_chr_to_files = collections.defaultdict(list)
     for f in files:
         _, name = os.path.split(f)
@@ -23,20 +26,23 @@ def create_shards(path, train_out_path, test_out_path, test_chrs, blocksize=1000
         tf_d[tft] = 1
         if chr in test_chrs:
             test_chr_to_files[chr].append(f)
+        elif chr in valid_chrs:
+            valid_chr_to_files[chr].append(f)
         else:
             train_chr_to_files[chr].append(f)
-            
+
     tf_to_pos = dict(map(reversed,enumerate(tf_d.keys())))
 
     # create iterator over lines
-    
+
     def file_input(files):
         for f in files:
             with open(f,'r') as fin:
                 for line in fin:
                     yield line
-                    
+
     train_readers = {chr:file_input(train_chr_to_files[chr]) for chr in train_chr_to_files.keys()}
+    valid_readers = {chr:file_input(valid_chr_to_files[chr]) for chr in valid_chr_to_files.keys()}
     test_readers = {chr:file_input(test_chr_to_files[chr]) for chr in test_chr_to_files.keys()}
 
     seq_len = None
@@ -57,7 +63,7 @@ def create_shards(path, train_out_path, test_out_path, test_chrs, blocksize=1000
                 return nuc_to_onehot_d[c]
             except KeyError:
                 return [0,0,0,0]
-        
+
         if not os.path.exists(path):
             os.makedirs(path)
         idx = 0
@@ -101,7 +107,7 @@ def create_shards(path, train_out_path, test_out_path, test_chrs, blocksize=1000
                     binary_writer.write(example.SerializeToString())
                 this_idx += 1
             if this_idx % blocksize == 0:
-                
+
                 this_idx = 0
                 idx += 1
                 print idx
@@ -116,6 +122,7 @@ def create_shards(path, train_out_path, test_out_path, test_chrs, blocksize=1000
         pd.Series({'tf_to_pos':tf_to_pos, 'seq_len':seq_len, 'label_len':label_len}).to_csv('%s/info' % path)
 
     write(train_readers, blocksize, train_out_path)
+    write(valid_readers, blocksize, valid_out_path)
     write(test_readers, blocksize, test_out_path)
 
 def get_seq_and_label(out_path):
