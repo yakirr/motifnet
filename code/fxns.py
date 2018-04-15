@@ -1,3 +1,4 @@
+from __future__ import print_function, division
 import numpy as np
 import pandas as pd
 import collections
@@ -63,7 +64,7 @@ def create_shards(path, train_out_path, valid_out_path, test_out_path,
         if not os.path.exists(path):
             os.makedirs(path)
         idx = 0
-        this_idx = 0
+        this_idx = total_idx = 0
         text_writer = None
         binary_writer = None
         while True:
@@ -102,12 +103,11 @@ def create_shards(path, train_out_path, valid_out_path, test_out_path,
                             )
                         )
                     binary_writer.write(example.SerializeToString())
-                this_idx += 1
+                this_idx += 1; total_idx += 1
             if this_idx % blocksize == 0:
-
                 this_idx = 0
                 idx += 1
-                print idx
+                print(idx)
 
                 if text:
                     text_writer.close()
@@ -115,6 +115,7 @@ def create_shards(path, train_out_path, valid_out_path, test_out_path,
                 if binary:
                     binary_writer.close()
                     binary_writer = None
+        print(total_idx, 'total records written')
 
         pd.Series({'tf_to_pos':tf_to_pos, 'seq_len':seq_len, 'label_len':label_len}).to_csv('%s/info' % path)
 
