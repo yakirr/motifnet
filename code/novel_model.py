@@ -1,11 +1,5 @@
 import tensorflow as tf
 
-def get_logreg_model(seq_batch, label_batch, seq_len, label_len):
-    B = tf.get_variable("B", [seq_len, label_len], dtype=tf.float32)
-    logits = tf.matmul(seq_batch, B)
-    loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=label_batch, logits=logits), axis=[0,1])
-    return loss, logits
-
 def create_new_conv_layer(input_data, num_input_channels, num_filters, filter_shape, pool_shape, name):
     # setup the filter input shape for tf.nn.conv_2d
     conv_filt_shape = [filter_shape[0], filter_shape[1], num_input_channels,
