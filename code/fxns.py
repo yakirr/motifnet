@@ -167,3 +167,7 @@ def get_logreg_model(seq_batch, label_batch, seq_len, label_len):
     logits = tf.matmul(seq_batch, B)
     loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=label_batch, logits=logits), axis=[0,1])
     return loss
+
+def get_novel_model(seq_batch, label_batch, seq_len, label_len):
+    reshaped_seq_batch = tf.reshape(seq_batch, (-1, seq_len/4,4))
+    
