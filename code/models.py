@@ -1,10 +1,10 @@
-
+import tensorflow as tf
 
 def get_logreg_model(seq_batch, label_batch, seq_len, label_len):
     B = tf.get_variable("B", [seq_len, label_len], dtype=tf.float32)
     logits = tf.matmul(seq_batch, B)
     loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=label_batch, logits=logits), axis=[0,1])
-    return loss
+    return loss, logits
 
 def create_new_conv_layer(input_data, num_input_channels, num_filters, filter_shape, pool_shape, name):
     # setup the filter input shape for tf.nn.conv_2d
@@ -36,12 +36,13 @@ def get_novel_model(seq_batch, label_batch, seq_len, label_len, infos):
     # infos is tuples of num_filters (i.e. # of motifs), filter_shape (i.e. ~4 x 20), pool_shape (i.e. 2 x 2)
     
     NUM = 4
+    num_input_channels = 1
     
-    reshaped_seq_batch = tf.reshape(seq_batch, (-1, NUM, seq_len/NUM))
+    reshaped_seq_batch = tf.reshape(seq_batch, (-1, NUM, seq_len/NUM, num_input_channels))
 
     layer = reshaped_seq_batch
-    for (layer_idx, (num_filters, filter_shape, pool_shape)) in enumerate(info):
-        layer, weights = create_new_conv_layer(input_data, num_input_channels, num_filters, filter_shape, pool_shape, 'layer_%d' % layer_idx)
+    for (layer_idx, (num_filters, filter_shape, pool_shape)) in enumerate(infos):
+        layer, weights = create_new_conv_layer(layer, num_input_channels, num_filters, filter_shape, pool_shape, 'layer_%d' % layer_idx)
         if layer_idx == 0:
             input_weights = weights
 
