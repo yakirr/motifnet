@@ -6,7 +6,7 @@ import tensorflow as tf
 
 def create_shards(path, train_out_path, valid_out_path, test_out_path,
         test_chrs, valid_chrs,
-        blocksize=1000, text=True, binary=True, num_blocks=None, task_file='tasks.txt'):
+        blocksize=1000, text=True, binary=True, num_blocks=None, task_file='alltasks.tasknames'):
     # output 2 folders, with samples from 
 
     from os import listdir
@@ -162,12 +162,3 @@ def get_seq_and_label(out_path):
 
     return (seq, label), info
 
-def get_logreg_model(seq_batch, label_batch, seq_len, label_len):
-    B = tf.get_variable("B", [seq_len, label_len], dtype=tf.float32)
-    logits = tf.matmul(seq_batch, B)
-    loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=label_batch, logits=logits), axis=[0,1])
-    return loss
-
-def get_novel_model(seq_batch, label_batch, seq_len, label_len):
-    reshaped_seq_batch = tf.reshape(seq_batch, (-1, seq_len/4,4))
-    
