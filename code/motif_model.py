@@ -30,6 +30,16 @@ def create_new_conv_layer(input_data, num_input_channels, num_filters, filter_sh
     if set_weights is None:
         weights = tf.Variable(tf.truncated_normal(conv_filt_shape, stddev=0.03),
                                           name=name+'_W')
+    elif set_weights == 'dumb':
+        print(filter_shape[1])
+        weights_ones = np.random.choice(num_input_channels, size=(filter_shape[1], num_filters))
+        weights_full = np.zeros(conv_filt_shape)
+        for i in range(filter_shape[1]):
+            for j in range(num_filters):
+                weights_full[0, i, weights_ones[i,j], j] = 1
+        weights = tf.constant(weights_full.astype(np.float32), name=name+'_W')
+        # weights = tf.constant(np.ones(conv_filt_shape).astype(np.float32), name=name+'_W')
+        # weights = tf.constant(np.zeros(conv_filt_shape).astype(np.float32), name=name+'_W')
     else:
         weights = tf.constant(set_weights.astype(np.float32), name=name+'_W')
 
