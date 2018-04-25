@@ -126,7 +126,7 @@ def create_shards(path, train_out_path, valid_out_path, test_out_path,
     print('creating test set')
     write(test_readers, blocksize, test_out_path)
 
-def get_seq_and_label(out_path):
+def get_seq_and_label(out_path, num_epochs=None):
     from os import listdir
     from os.path import isfile, join
     files = [join(out_path,f) for f in listdir(out_path) if isfile(join(out_path, f)) and f[-9:] == 'tfrecords']
